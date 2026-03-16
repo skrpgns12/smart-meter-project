@@ -1,25 +1,34 @@
-import joblib
 import pandas as pd
 import numpy as np
+import joblib
 from datetime import datetime
 
-# 1. 현장 배포용 학습 모델 로드
+# 1. 3대 핵심 모델 로드 (유량 예측, 수압 예측, 이상 탐지)
 try:
-    # lgbm: 정상 패턴 예측기 / iso_forest: 이상치 최종 검증기
-    model_lgb = joblib.load('./models/lgbm_leak_predictor.pkl')
+    model_flow = joblib.load('./models/lgbm_leak_predictor.pkl')
+    model_press = joblib.load('./models/pressure_predictor.pkl')
     iso_forest = joblib.load('./models/iso_forest_validator.pkl')
-    print(f"[{datetime.now()}] ✅ 누수 감지 엔진 가동 준비 완료")
+    print(f"[{datetime.now()}] ✅ 유량/수압 통합 진단 엔진 로드 완료")
 except Exception as e:
     print(f"❌ 모델 로드 실패: {e}")
 
-def check_leak(flow, pressure, history_data):
+def run_inference(recent_features, current_actuals):
     """
-    [실시간 진단 로직]
-    1. LightGBM으로 현재 시점의 '정상 유량' 예측
-    2. 실제 유량과 예측값의 차이(잔차) 계산
-    3. Z-score 3.0 이상 & Isolation Forest 이상 판정 시 '주의' 단계
-    4. 위 현상이 30분(3회) 지속 시 '최종 누수 알람' 발령
+    recent_features: 학습 시 사용한 features (Lag 데이터 등)
+    current_actuals: [현재 유량, 현재 수압] 실측값
     """
-    pass 
-" " 
-" " 
+    # 1. 유량(Flow) 및 수압(Pressure) 개별 예측
+    pred_flow = model_flow.predict([recent_features])[0]
+    pred_press = model_press.predict([recent_features])[0]
+    
+    # 2. 이상 탐지 엔진 검증 (Isolation Forest)
+    is_anomaly = iso_forest.predict([current_actuals])[0] # -1이면 이상
+    
+    return {
+        "flow_pred": pred_flow,
+        "press_pred": pred_press,
+        "is_anomaly": is_anomaly == -1
+    }
+
+if __name__ == "__main__":
+    print("🚀 실시간 유량/수압 모니터링 가동 중...")
