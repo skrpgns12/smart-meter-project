@@ -21,3 +21,4 @@ def check_leak(flow, pressure, history_data):
     4. 위 현상이 30분(3회) 지속 시 '최종 누수 알람' 발령
     """
     pass 
+" " 
