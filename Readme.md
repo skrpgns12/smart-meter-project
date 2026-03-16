@@ -1,29 +1,28 @@
-📂 프로젝트 진행 상황 리포트
-1. 데이터 준비 (Data Engineering)
--원본 데이터: L001_2504021029.txt (약 8개월치 스마트 미터 기록)
-수행 작업:
--비정형 텍스트 데이터를 Pandas로 로드하여 컬럼명(ID, Timestamp, Flow_Instant, Pressure 등) 부여.
--날짜와 시간을 합쳐 정교한 시계열 타임스탬프 생성.
--AI 모델이 읽기 쉬운 정형 데이터인 smart_meter_data.csv로 변환 완료.
-데이터 특징:
--기간: 2024-07-20 ~ 2025-04-02 (약 8.5개월)
--행 수: 36,864개 (약 10분 단위 수집 데이터)
+# 💧 스마트 미터 온디바이스(On-device) 누수 감지 시스템
+> **비전공자 관점의 딥러닝 한계 극복 및 경량 머신러닝 최적화 프로젝트**
 
-2. 전략 수립 (AI Research via Perplexity Pro)
--예측 목표: 향후 7일(1주일) 치의 유량과 수압 수치 동시 예측.
--모델 선정: 최신 다변량 시계열 모델인 TSMixer 채택.
--이유: 유량과 수압의 강한 상관관계를 동시에 학습(Multi-task Learning)하여 정확도 향상.
--학습 설정:
---입력(Look-back Window): 과거 14~28일치 데이터를 보고 패턴 학습.
---출력(Horizon): 미래 7일치 데이터 생성.
+## 🎯 프로젝트 개요
+상수도 스마트 미터 데이터를 활용하여 현장형 기기(저사양 CPU)에서 실시간으로 누수 및 이상 징후를 진단하는 AI 모델을 구축했습니다.
 
-3. 개발 환경 설정 (Environment)
--IDE: VS Code (Jupyter Notebook 확장 활용).
--하드웨어: CPU 기반 환경 (GPU 미사용).
--주요 라이브러리: Darts (시계열 전문 프레임워크), Pandas, PyTorch.
+## 🚀 핵심 성과 (Key Results)
+1. **모델 전략 수정:** 딥러닝(TSMixer)의 과도한 스무딩 문제를 **LightGBM**으로 해결하여 피크 재현력 확보
+2. **실무형 알람 최적화:** 30분 지속성 필터(Persistence Filter) 도입으로 알람 횟수 62% 감소 (**262회 → 99회**)
+3. **온디바이스 최적화:** PyTorch 등 무거운 라이브러리 없이 **LGBM + Isolation Forest** 조합으로 1ms 이내 추론 실현
+4. **이중 검증 시스템:** 통계적 기법(Z-score)과 기계학습(Isolation Forest)의 교차 검증으로 오탐지(False Positive) 최소화
 
-🚀 다음 단계 (Next Action)
-이제 02_model_training.ipynb 파일을 만드시고, 제가 드린 TSMixer 학습 코드를 넣고 실행할 차례입니다.
-실행 전 주의사항:
-라이브러리 설치: 터미널에서 pip install darts matplotlib torch 명령어를 꼭 먼저 실행해 주세요.
-경로 확인: pd.read_csv('../data/processed/smart_meter_data.csv') 경로가 실제 파일 위치와 맞는지 확인하세요.
+## 🛠 기술 스택 (Tech Stack)
+- **Language:** Python 3.11
+- **Models:** LightGBM, Isolation Forest, EWMA
+- **Frameworks:** Darts (Baseline Study), Scikit-learn, Pandas, Joblib
+
+## 📂 프로젝트 구조
+- `/notebooks`: 
+  - `01_data_load.ipynb`: 데이터 전처리 및 음수(Negative) 유량 보정
+  - `02_model_tsmixer.ipynb`: 딥러닝 기반 성능 기준점 수립
+  - `03_model_lightweight.ipynb`: 현장용 경량 모델 및 실무 필터 튜닝 (최종본)
+- `/models`: 학습 완료된 배포용 모델 (.pkl)
+- `inference.py`: 현장 기기용 실시간 추론 스크립트
+
+## 📈 분석 인사이트
+- 상수도 데이터는 계절적/시간적 패턴이 강해 단순 임계치 방식보다 **과거 데이터(Lag)**를 활용한 예측 모델이 유효함.
+- 누수는 일시적인 튀튀(Noise)와 구별되어야 하므로 **30분 연속 이상 발생 조건**이 현장 신뢰도를 높이는 결정적 요인이 됨.

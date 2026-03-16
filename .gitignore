@@ -1,0 +1,37 @@
+# 1. 가상환경 및 라이브러리 폴더 (가장 중요)
+wvr_env/
+venv/
+.venv/
+env/
+bin/
+include/
+lib/
+lib64/
+share/
+
+# 2. 데이터 폴더 (대용량 파일 업로드 방지)
+data/raw/
+data/processed/
+*.csv
+*.txt
+*.xlsx
+
+# 3. 모델 파일 (용량이 크면 제외하지만, .pkl이 작다면 선택사항)
+# 만약 모델도 깃허브에 올리고 싶지 않다면 아래 주석을 푸세요.
+# models/*.pkl
+
+# 4. 파이썬 실행 부산물
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# 5. 주피터 노트북 체크포인트
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# 6. 운영체제 및 에디터 설정
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
